@@ -11,8 +11,10 @@ import { Link, useParams } from 'react-router-dom';
 import Button from '../../../components/Button';
 import Footer from '../../../components/Footer';
 import Header from '../../../components/Header';
+import Loading from '../../../components/Loading';
 
 import TextArea from '../../../components/TextArea';
+import { useAuth } from '../../../hooks/auth';
 import { ICart, useCart } from '../../../hooks/cart';
 import { useProducts } from '../../../hooks/product';
 import formatValue from '../../../utils/formatValues';
@@ -52,8 +54,15 @@ interface IRequest {
 const Product: React.FC = () => {
   const { slug } = useParams<IParams>();
 
-  const { loadProduct, product, comments, handleComments } = useProducts();
+  const {
+    loadProduct,
+    product,
+    comments,
+    handleComments,
+    loading,
+  } = useProducts();
   const { cart, handleAddToCart } = useCart();
+  const { user } = useAuth();
 
   const [sizeSelected, setSizeSelected] = useState<ISize>({} as ISize);
   const [productCart, setProductCart] = useState<ICart>({} as ICart);
@@ -119,6 +128,8 @@ const Product: React.FC = () => {
   return (
     <Container>
       <Header />
+
+      {loading && <Loading />}
 
       {!!product && (
         <>
@@ -265,18 +276,19 @@ const Product: React.FC = () => {
                 {` (${comments.length})`}
               </h2>
 
-              <Form onSubmit={handleSubmit} ref={formRef}>
-                <TextArea
-                  name="comment"
-                  icon={FiMessageSquare}
-                  placeholder="Insira um comentário"
-                  required
-                />
-                <Button type="submit">
-                  <FiSend />
-                </Button>
-              </Form>
-
+              {user && (
+                <Form onSubmit={handleSubmit} ref={formRef}>
+                  <TextArea
+                    name="comment"
+                    icon={FiMessageSquare}
+                    placeholder="Insira um comentário"
+                    required
+                  />
+                  <Button type="submit">
+                    <FiSend />
+                  </Button>
+                </Form>
+              )}
               {comments.length === 0 ? (
                 <p>Nenhum comentário feito sobre este produto</p>
               ) : (

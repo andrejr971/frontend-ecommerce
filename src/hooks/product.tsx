@@ -62,6 +62,7 @@ interface IProductContextData {
   loadProduct: (slug: string) => Promise<void>;
   handleComments: (data: IRequestComment) => Promise<void>;
   handleDelete: (id: number) => Promise<void>;
+  loading: boolean;
 }
 
 interface IRequestComment {
@@ -80,25 +81,31 @@ const ProductProvider: React.FC = ({ children }) => {
     {} as IProductVariation,
   );
   const [comments, setComments] = useState<IComment[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const { addToast } = useToast();
 
   const loadData = useCallback(async () => {
+    setLoading(true);
+
     const response = await api.get('product-variations');
     setProducts(
       response.data.map((formatProduct: Omit<IProduct, 'priceFormatted'>) => ({
         ...formatProduct,
         priceFormatted: formatValue(formatProduct.price),
         priceDiscount: formatProduct.discount
-          ? formatProduct.price - formatProduct.price / formatProduct.discount
+          ? formatProduct.price -
+            formatProduct.price * (formatProduct.discount / 100)
           : null,
       })),
     );
 
     setProductsHome(response.data);
+    setLoading(false);
   }, []);
 
   const loadProduct = useCallback(async (slug: string) => {
+    setLoading(true);
     const response = await api.get(`product-variations/${slug}`);
     const { data } = await api.get(`comments/${response.data.id}`);
 
@@ -106,11 +113,13 @@ const ProductProvider: React.FC = ({ children }) => {
       ...response.data,
       priceFormatted: formatValue(response.data.price),
       priceDiscount: response.data.discount
-        ? response.data.price - response.data.price / response.data.discount
+        ? response.data.price -
+          response.data.price * (response.data.discount / 100)
         : null,
     });
 
     setComments(data);
+    setLoading(false);
   }, []);
 
   const handleComments = useCallback(
@@ -160,6 +169,7 @@ const ProductProvider: React.FC = ({ children }) => {
         handleComments,
         handleDelete,
         productsHome,
+        loading,
       }}
     >
       {children}

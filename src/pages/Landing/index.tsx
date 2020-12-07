@@ -7,14 +7,17 @@ import Header from '../../components/Header';
 import Slide from '../../components/Slide';
 
 import { Container, Content, Main } from './styles';
+import Loading from '../../components/Loading';
 
 const Landing: React.FC = () => {
-  const { productsHome } = useProducts();
+  const { productsHome, loading } = useProducts();
 
   return (
     <Container>
       <Header />
       <Slide />
+
+      {loading && <Loading />}
 
       <Content>
         <h1>Destaques</h1>
