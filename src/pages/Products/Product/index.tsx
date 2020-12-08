@@ -75,6 +75,18 @@ const Product: React.FC = () => {
 
   useEffect(() => {
     if (product.sizes) {
+      if (product.sizes[0].quantity === '0') {
+        const findSize = product.sizes.find(size => size.quantity !== '0');
+
+        if (!findSize) {
+          setSizeSelected(product.sizes[0]);
+          return;
+        }
+
+        setSizeSelected(findSize);
+        return;
+      }
+
       setSizeSelected(product.sizes[0]);
     }
   }, [slug, product.sizes]);
